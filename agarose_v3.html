@@ -287,11 +287,20 @@ class Bead {
   }
 }
 
-// ── Chain sizing: more chains shorter at high conc ─────────────
+// ── Chain sizing: more chains at high concentration, same length ────
+// Real agarose chains are a fixed length (~400 monomers) regardless of
+// concentration. Increasing wt% means more chains per unit volume, NOT
+// shorter chains. The previous code shrunk chain length at high conc,
+// which made high-concentration gels look "zoomed out" — visually
+// misleading and physically wrong.
 function chainParams() {
-  const t=(concentration-10)/50;   // 0 at 1%, 1.0 at 6%
-  const nc=Math.round(220+t*380);  // 220 at 1%, 600 at 6% — denser SEM-like network
-  const bpc=Math.round(8-t*3);     // 8 at 1%, 5 at 6% — shorter chains at high conc
+  const t=(concentration-10)/50;     // 0 at 1%, 1.0 at 6%
+  // Linear scaling in chain count — c=2x means 2x as many chains.
+  // 150 chains at 1%, 750 chains at 6% (5x) — slightly under-scaled
+  // from true 6x to keep frame rate reasonable in browsers.
+  const nc=Math.round(150+t*600);
+  // Fixed chain length, independent of concentration.
+  const bpc=7;
   return {nc,bpc};
 }
 
