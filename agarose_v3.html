@@ -437,19 +437,9 @@ function applyForces() {
   }
   for(const p of junctions){ totalBeads[p.i1].jc++; totalBeads[p.i2].jc++; }
 
-  // 1b. Soft boundary repulsion — pushes beads away from edges
-  // when they get within EDGE_ZONE px of the wall, without pulling
-  // toward centre. This prevents edge-concentration without collapsing
-  // the network into a ball.
-  const EDGE_ZONE=W*0.12;  // repulsion starts 12% of canvas width from edge
-  const EDGE_K=0.05;       // stronger push (was 0.015, too weak — beads accumulated at walls)
-  for(const b of totalBeads){
-    const distL=b.x, distR=W-b.x, distT=b.y, distB=H-b.y;
-    if(distL<EDGE_ZONE) b.fx+=EDGE_K*(EDGE_ZONE-distL);
-    if(distR<EDGE_ZONE) b.fx-=EDGE_K*(EDGE_ZONE-distR);
-    if(distT<EDGE_ZONE) b.fy+=EDGE_K*(EDGE_ZONE-distT);
-    if(distB<EDGE_ZONE) b.fy-=EDGE_K*(EDGE_ZONE-distB);
-  }
+  // 1b. Boundary handling moved to integration step (specular reflection).
+  // No volume-spanning forces are applied here so the chain distribution
+  // stays uniform across the canvas without artificial inward pressure.
 
   // 2. Intra-chain: harmonic bonds + bending stiffness
   for(let ci=0;ci<chains.length;ci++){
@@ -702,10 +692,14 @@ function integrate(){
     if(b.vx>MAX_V)  b.vx=MAX_V;  else if(b.vx<-MAX_V) b.vx=-MAX_V;
     if(b.vy>MAX_V)  b.vy=MAX_V;  else if(b.vy<-MAX_V) b.vy=-MAX_V;
     b.x+=b.vx*DT; b.y+=b.vy*DT;
-    if(b.x<8){b.x=8;b.vx=Math.abs(b.vx)*0.85;}
-    else if(b.x>W-8){b.x=W-8;b.vx=-Math.abs(b.vx)*0.85;}
-    if(b.y<8){b.y=8;b.vy=Math.abs(b.vy)*0.85;}
-    else if(b.y>H-8){b.y=H-8;b.vy=-Math.abs(b.vy)*0.85;}
+    // Specular reflection at walls: reflect both position and velocity.
+    // This conserves energy fully (no damping at walls) and prevents
+    // beads from accumulating at edges. The bead behaves as if the wall
+    // is a perfect elastic mirror.
+    if(b.x<8){ b.x=16-b.x; b.vx=-b.vx; }
+    else if(b.x>W-8){ b.x=2*(W-8)-b.x; b.vx=-b.vx; }
+    if(b.y<8){ b.y=16-b.y; b.vy=-b.vy; }
+    else if(b.y>H-8){ b.y=2*(H-8)-b.y; b.vy=-b.vy; }
   }
 }
 
