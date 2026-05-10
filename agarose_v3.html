@@ -295,12 +295,20 @@ class Bead {
 // misleading and physically wrong.
 function chainParams() {
   const t=(concentration-10)/50;     // 0 at 1%, 1.0 at 6%
-  // Linear scaling in chain count — higher conc = more chains, same length.
-  // 280 chains at 1%, 1000 chains at 6% (~3.6× ratio).
-  // Physical truth would be 6× ratio, but visualization budgets force a
-  // compromise: 1% needs enough chains to form a recognizable gel, and 6%
-  // needs to stay under ~7000 beads to keep browsers responsive.
-  const nc=Math.round(280+t*720);
+  // Chain count scales with canvas area so density stays constant
+  // regardless of screen size or browser window.
+  //   Reference values are tuned for an 800 × 500 = 400,000 px² canvas:
+  //     - 280 chains at 1%, 1000 chains at 6%
+  //   At larger or smaller canvases, chain count scales proportionally
+  //   so the visual density (chains per unit area) is the same.
+  // Without this scaling, the same simulation looks dense on small screens
+  // and sparse on large screens — a confusing inconsistency.
+  const REF_AREA=400000;
+  const areaScale=(W*H)/REF_AREA;
+  const baseCount=280+t*720;
+  // Clamp to prevent runaway counts on huge displays or insufficient
+  // chains on tiny screens.
+  const nc=Math.round(Math.max(80, Math.min(2000, baseCount*areaScale)));
   // Fixed chain length, independent of concentration.
   const bpc=7;
   return {nc,bpc};
