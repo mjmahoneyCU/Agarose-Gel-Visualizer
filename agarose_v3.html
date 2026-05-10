@@ -442,7 +442,7 @@ function applyForces() {
   // toward centre. This prevents edge-concentration without collapsing
   // the network into a ball.
   const EDGE_ZONE=W*0.12;  // repulsion starts 12% of canvas width from edge
-  const EDGE_K=0.015;
+  const EDGE_K=0.05;       // stronger push (was 0.015, too weak — beads accumulated at walls)
   for(const b of totalBeads){
     const distL=b.x, distR=W-b.x, distT=b.y, distB=H-b.y;
     if(distL<EDGE_ZONE) b.fx+=EDGE_K*(EDGE_ZONE-distL);
@@ -702,10 +702,10 @@ function integrate(){
     if(b.vx>MAX_V)  b.vx=MAX_V;  else if(b.vx<-MAX_V) b.vx=-MAX_V;
     if(b.vy>MAX_V)  b.vy=MAX_V;  else if(b.vy<-MAX_V) b.vy=-MAX_V;
     b.x+=b.vx*DT; b.y+=b.vy*DT;
-    if(b.x<8){b.x=8;b.vx=Math.abs(b.vx)*0.20;}
-    else if(b.x>W-8){b.x=W-8;b.vx=-Math.abs(b.vx)*0.20;}
-    if(b.y<8){b.y=8;b.vy=Math.abs(b.vy)*0.20;}
-    else if(b.y>H-8){b.y=H-8;b.vy=-Math.abs(b.vy)*0.20;}
+    if(b.x<8){b.x=8;b.vx=Math.abs(b.vx)*0.85;}
+    else if(b.x>W-8){b.x=W-8;b.vx=-Math.abs(b.vx)*0.85;}
+    if(b.y<8){b.y=8;b.vy=Math.abs(b.vy)*0.85;}
+    else if(b.y>H-8){b.y=H-8;b.vy=-Math.abs(b.vy)*0.85;}
   }
 }
 
