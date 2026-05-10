@@ -295,10 +295,12 @@ class Bead {
 // misleading and physically wrong.
 function chainParams() {
   const t=(concentration-10)/50;     // 0 at 1%, 1.0 at 6%
-  // Linear scaling in chain count — c=2x means 2x as many chains.
-  // 150 chains at 1%, 750 chains at 6% (5x) — slightly under-scaled
-  // from true 6x to keep frame rate reasonable in browsers.
-  const nc=Math.round(150+t*600);
+  // Linear scaling in chain count — higher conc = more chains, same length.
+  // 280 chains at 1%, 1000 chains at 6% (~3.6× ratio).
+  // Physical truth would be 6× ratio, but visualization budgets force a
+  // compromise: 1% needs enough chains to form a recognizable gel, and 6%
+  // needs to stay under ~7000 beads to keep browsers responsive.
+  const nc=Math.round(280+t*720);
   // Fixed chain length, independent of concentration.
   const bpc=7;
   return {nc,bpc};
